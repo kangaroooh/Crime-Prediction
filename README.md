@@ -11,5 +11,5 @@ conda create -n txtmng-dev -f environment.yml
 source activate txtmng-dev
 ```
 
-## Commiting
-it might be a good idea to run `yapf -ir file1 file2...` just to make your code have cuter format
+## Styling
+it might be a good idea to run `yapf -ir file1 file2...` in the root directory of the repo just to make your code have cuter format
