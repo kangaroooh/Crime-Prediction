@@ -10,3 +10,6 @@ make sure you have conda install in your environment, so that we can make sure w
 conda create -n txtmng-dev -f environment.yml
 source activate txtmng-dev
 ```
+
+## Commiting
+it might be a good idea to run `yapf -ir file1 file2...` just to make your code have cuter format
