@@ -1,0 +1,7 @@
+name: dev
+dependencies:
+  - python=3.6
+  - pip:
+    - gensim==3.6.0
+    - numpy==1.15
+    - nltk==3.3
