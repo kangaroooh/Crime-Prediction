@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/robroooh/txt-mng.svg?branch=master)](https://travis-ci.org/robroooh/txt-mng)
+
 # Text Mining Project
 
 ## Setting up development environment
