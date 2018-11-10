@@ -10,7 +10,7 @@ make sure you have conda install in your environment, so that we can make sure w
 conda create -n txtmng-dev -f environment.yml
 source activate txtmng-dev
 ```
-alternatively, please make sure that you're using `python==3.6`
+alternatively, please make sure that you're using `python==3.7`
 ```sh
 pip install -r requirements.txt
 ```
