@@ -1,6 +1,4 @@
 language: python
-notifications:
-  slack: textmininggroupoulu:NmqBHaTJqsk1e5WZF9lm6rce
 python:
   - "3.6"
 install:
