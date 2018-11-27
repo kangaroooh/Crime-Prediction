@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/robroooh/txt-mng.svg?branch=master)](https://travis-ci.org/robroooh/txt-mng)
+[![Waffle.io - Issues in progress](https://badge.waffle.io/robroooh/txt-mng.png?label=in%20progress&title=In%20Progress)](http://waffle.io/robroooh/txt-mng)
 
 # Text Mining Project
 
