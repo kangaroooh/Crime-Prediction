@@ -92,3 +92,13 @@ def compute_effective_star_rating(x):
 hotel_effective_star_rating = hotel_reviews.apply(compute_effective_star_rating, axis=1)
 #%%
 hotel_reviews["Effective Star Rating"] = hotel_effective_star_rating
+"""
+Using Effective Star Rating to validate if our Effective Star rating
+is actually good by comparing it with the raw star rating
+"""
+#%%
+hotel_rates = hotel_reviews[["Hotel Name", "Hotel Review Stars", "Effective Star Rating"]].groupby("Hotel Name").mean()
+#%%
+eq = hotel_rates[hotel_rates["Hotel Review Stars"] == hotel_rates["Effective Star Rating"]]
+mt = hotel_rates[hotel_rates["Hotel Review Stars"] > hotel_rates["Effective Star Rating"]]
+lt = hotel_rates[hotel_rates["Hotel Review Stars"] < hotel_rates["Effective Star Rating"]]
