@@ -91,29 +91,10 @@ hotel_rates = hotel_reviews[["Hotel Name", "Hotel Review Stars", "Effective Star
 eq = hotel_rates[hotel_rates["Hotel Review Stars"] == hotel_rates["Effective Star Rating"]]
 mt = hotel_rates[hotel_rates["Hotel Review Stars"] > hotel_rates["Effective Star Rating"]]
 lt = hotel_rates[hotel_rates["Hotel Review Stars"] < hotel_rates["Effective Star Rating"]]
-hotel_reviews["Hotel Name"].nunique()
-
-#%%
-"""
-Finding correlation between hotel & Crime
-"""
-#%%
-unique_hotel = hotel_reviews[["Hotel Name","Latitude","Longitude"]].groupby("Hotel Name").first()
-#%%
-crime_data = pd.read_csv("crimedata/2018-08-metropolitan-street.csv")
-#%%
-unique_hotel["Latitude"] = pd.to_numeric(unique_hotel["Latitude"], errors='coerce')
-unique_hotel["Longitude"] = pd.to_numeric(unique_hotel["Longitude"], errors='coerce')
-result = pd.merge(unique_hotel, crime_data, how='left', on=["Latitude","Longitude"])
-
 #%%
 """
 Feature Extraction: Finding % of negative reviews.
 """
-grouped_hotelname = hotel_reviews[["Hotel Name", "Sentiment"]].groupby(
-        "Hotel Name")
-grouped_hotelname_rating = hotel_reviews[["Hotel Name", "Effective Star Rating"]].groupby(
-        "Hotel Name").mean()
 def smi(x):
     vcount = x["Sentiment"].value_counts()
     summi = 0
@@ -122,6 +103,10 @@ def smi(x):
     if 'Verynegative' in vcount:
         summi += vcount['Verynegative']
     return summi
+grouped_hotelname = hotel_reviews[["Hotel Name", "Sentiment"]].groupby(
+        "Hotel Name")
+grouped_hotelname_rating = hotel_reviews[["Hotel Name", "Effective Star Rating"]].groupby(
+        "Hotel Name").mean()
 negrev = grouped_hotelname.agg(smi)
 allrev = grouped_hotelname.agg('count')
 revs = pd.merge(negrev, allrev, on="Hotel Name")
@@ -139,3 +124,38 @@ agg_hotel = agg_hotel[["Hotel Name", "Hotel Address", "Effective Star Rating", "
 """
 Feature Extraction: is hotel near crime?.
 """
+import re
+def clean_loc(x):
+    splits = x.split(" ")
+    if splits[0].isdigit():
+        return " ".join(splits[-2:])
+    if re.findall(".+[-/].+", splits[0]):
+        return " ".join(splits[-2:])
+    return " ".join(splits[-2:])
+hotelnames = agg_hotel["Hotel Address"]
+hotelnames = hotelnames.apply(clean_loc)
+#%%
+agg_hotel["Hotel Address"] = hotelnames
+#%%
+crime = pd.read_csv("crimedata/AVG_CRIME_LOCAT_MTH38.csv")
+#%%
+res = pd.merge(agg_hotel,crime,left_on='Hotel Address',right_on='location')
+#%%
+import geopy.distance
+def calc_distance(x):
+    return geopy.distance.vincenty((x["Latitude_x"], x["Longitude_x"]),
+                                   (x["Latitude_y"], x["Longitude_y"])).km
+#%%
+res.at[538,"Latitude_x"] = res.at[539,"Latitude_x"]
+res.at[538,"Longitude_x"] = res.at[539,"Longitude_x"]
+res.at[538,"Latitude_y"] = res.at[539,"Latitude_y"]
+res.at[538,"Longitude_y"] = res.at[539,"Longitude_y"]
+res.at[784,"Latitude_x"] = res.at[785,"Latitude_x"]
+res.at[784,"Longitude_x"] = res.at[785,"Longitude_x"]
+res.at[784,"Latitude_y"] = res.at[785,"Latitude_y"]
+res.at[784,"Longitude_y"] = res.at[785,"Longitude_y"]
+#%%
+res['distance'] = res.apply(calc_distance, axis=1)
+
+#%%
+res.to_excel("final.xlsx")
