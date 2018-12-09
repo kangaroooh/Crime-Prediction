@@ -7,10 +7,7 @@ Created on Sat Dec  8 18:18:20 2018
 """
 import pandas as pd
 from glob import glob
-import openpyxl
-import xlrd
 from stanfordcorenlp import StanfordCoreNLP
-import json
 from tqdm import tqdm
 #%%
 hotel_reviews = pd.read_excel("combine_123_allcols.xlsx")
@@ -84,8 +81,7 @@ def compute_effective_star_rating(x):
     else:
         ret = None
     return ret
-hotel_effective_star_rating = hotel_reviews.apply(compute_effective_star_rating, axis=1)
-hotel_reviews["Effective Star Rating"] = hotel_effective_star_rating
+hotel_reviews["Effective Star Rating"] = hotel_reviews.apply(compute_effective_star_rating, axis=1)
 #%%
 """
 Using Effective Star Rating to validate if our Effective Star rating
@@ -128,13 +124,18 @@ def smi(x):
     return summi
 negrev = grouped_hotelname.agg(smi)
 allrev = grouped_hotelname.agg('count')
-ab = pd.merge(negrev, allrev, on="Hotel Name")
-ab.columns = ["nb_negreview", "nb_allreview"]
-final_hotel = pd.merge(ab, grouped_hotelname_rating.reset_index(), on="Hotel Name")
-final_hotel["percent_negreviews"] = final_hotel["nb_negreview"]/final_hotel["nb_allreview"]
+revs = pd.merge(negrev, allrev, on="Hotel Name")
+revs.columns = ["nb_negreview", "nb_allreview"]
+revs["percent_negreviews"] = revs["nb_negreview"]/revs["nb_allreview"]
 #%%
-subhotel = hotel_reviews[["Hotel Name", "Hotel Address"]].drop_duplicates(subset="Hotel Name")
+"""
+Make an aggregated table
+"""
+agg_hotel = pd.merge(revs, grouped_hotelname_rating.reset_index(), on="Hotel Name")
+subhotel = hotel_reviews[["Hotel Name", "Hotel Address", "Latitude", "Longitude"]].drop_duplicates(subset="Hotel Name")
+agg_hotel = pd.merge(agg_hotel, subhotel, left_on="Hotel Name", right_on="Hotel Name")
+agg_hotel = agg_hotel[["Hotel Name", "Hotel Address", "Effective Star Rating", "percent_negreviews", "Latitude", "Longitude"]]
 #%%
-final_hotel = pd.merge(final_hotel, subhotel, left_on="Hotel Name", right_on="Hotel Name")
-#%%
-final_hotel = final_hotel[["Hotel Name", "Hotel Address", "Effective Star Rating", "percent_negreviews"]]
+"""
+Feature Extraction: is hotel near crime?.
+"""
