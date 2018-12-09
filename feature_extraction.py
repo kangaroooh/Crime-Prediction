@@ -23,8 +23,6 @@ Compute Class for classification based on Sentiment Analysis and Review Stars
 We believe that if those two don't go together, they might mess up our
 analysis later, to we exclude them (making them -1)
 """
-review_stars = hotel_reviews["Review Stars"]
-#%%
 def compute_class(x):
     star = x["Review Stars"]
     sent = x["Sentiment"]
@@ -116,11 +114,10 @@ result = pd.merge(unique_hotel, crime_data, how='left', on=["Latitude","Longitud
 """
 Feature Extraction: Finding % of negative reviews.
 """
-hotel_reviews["Hotel Name"] = hotel_reviews["Hotel Name"].apply(lambda x: x.strip())
-#%%
 grouped_hotelname = hotel_reviews[["Hotel Name", "Sentiment"]].groupby(
         "Hotel Name")
-#%%
+grouped_hotelname_rating = hotel_reviews[["Hotel Name", "Effective Star Rating"]].groupby(
+        "Hotel Name").mean()
 def smi(x):
     vcount = x["Sentiment"].value_counts()
     summi = 0
@@ -133,7 +130,11 @@ negrev = grouped_hotelname.agg(smi)
 allrev = grouped_hotelname.agg('count')
 ab = pd.merge(negrev, allrev, on="Hotel Name")
 ab.columns = ["nb_negreview", "nb_allreview"]
+final_hotel = pd.merge(ab, grouped_hotelname_rating.reset_index(), on="Hotel Name")
+final_hotel["percent_negreviews"] = final_hotel["nb_negreview"]/final_hotel["nb_allreview"]
 #%%
-hotel_reviews = pd.merge(hotel_reviews, ab, left_on="Hotel Name", right_on="Hotel Name")
+subhotel = hotel_reviews[["Hotel Name", "Hotel Address"]].drop_duplicates(subset="Hotel Name")
 #%%
-hotel_reviews.to_excel("negreviews.xlsx")
+final_hotel = pd.merge(final_hotel, subhotel, left_on="Hotel Name", right_on="Hotel Name")
+#%%
+final_hotel = final_hotel[["Hotel Name", "Hotel Address", "Effective Star Rating", "percent_negreviews"]]
