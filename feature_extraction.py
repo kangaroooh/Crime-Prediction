@@ -87,10 +87,12 @@ hotel_reviews["Effective Star Rating"] = hotel_reviews.apply(compute_effective_s
 Using Effective Star Rating to validate if our Effective Star rating
 is actually good by comparing it with the raw star rating
 """
-hotel_rates = hotel_reviews[["Hotel Name", "Hotel Review Stars", "Effective Star Rating"]].groupby("Hotel Name").mean()
-eq = hotel_rates[hotel_rates["Hotel Review Stars"] == hotel_rates["Effective Star Rating"]]
-mt = hotel_rates[hotel_rates["Hotel Review Stars"] > hotel_rates["Effective Star Rating"]]
-lt = hotel_rates[hotel_rates["Hotel Review Stars"] < hotel_rates["Effective Star Rating"]]
+def describe_eff(x):
+    hotel_rates = x[["Hotel Name", "Hotel Review Stars", "Effective Star Rating"]].groupby("Hotel Name").mean()
+    eq = hotel_rates[hotel_rates["Hotel Review Stars"] == hotel_rates["Effective Star Rating"]]
+    mt = hotel_rates[hotel_rates["Hotel Review Stars"] > hotel_rates["Effective Star Rating"]]
+    lt = hotel_rates[hotel_rates["Hotel Review Stars"] < hotel_rates["Effective Star Rating"]]
+    print(len(eq), len(mt), len(lt))
 #%%
 """
 Feature Extraction: Finding % of negative reviews.
@@ -134,28 +136,28 @@ def clean_loc(x):
     return " ".join(splits[-2:])
 hotelnames = agg_hotel["Hotel Address"]
 hotelnames = hotelnames.apply(clean_loc)
-#%%
 agg_hotel["Hotel Address"] = hotelnames
 #%%
 crime = pd.read_csv("crimedata/AVG_CRIME_LOCAT_MTH38.csv")
-#%%
-res = pd.merge(agg_hotel,crime,left_on='Hotel Address',right_on='location')
+res = pd.merge(agg_hotel,crime,left_on='Hotel Address',right_on='location',how='left')
 #%%
 import geopy.distance
 def calc_distance(x):
+    if pd.isna(x["Latitude_x"]) or pd.isna(x["Longitude_x"]) or pd.isna(x["Latitude_y"]) or pd.isna(x["Longitude_y"]):
+        return None
     return geopy.distance.vincenty((x["Latitude_x"], x["Longitude_x"]),
                                    (x["Latitude_y"], x["Longitude_y"])).km
 #%%
-res.at[538,"Latitude_x"] = res.at[539,"Latitude_x"]
-res.at[538,"Longitude_x"] = res.at[539,"Longitude_x"]
-res.at[538,"Latitude_y"] = res.at[539,"Latitude_y"]
-res.at[538,"Longitude_y"] = res.at[539,"Longitude_y"]
-res.at[784,"Latitude_x"] = res.at[785,"Latitude_x"]
-res.at[784,"Longitude_x"] = res.at[785,"Longitude_x"]
-res.at[784,"Latitude_y"] = res.at[785,"Latitude_y"]
-res.at[784,"Longitude_y"] = res.at[785,"Longitude_y"]
+res.at[757,"Latitude_x"] = res.at[865,"Latitude_x"]
+res.at[757,"Longitude_x"] = res.at[865,"Longitude_x"]
+res.at[757,"Latitude_y"] = res.at[865,"Latitude_y"]
+res.at[757,"Longitude_y"] = res.at[865,"Longitude_y"]
+res.at[1139,"Latitude_x"] = res.at[294,"Latitude_x"]
+res.at[1139,"Longitude_x"] = res.at[294,"Longitude_x"]
+res.at[1139,"Latitude_y"] = res.at[294,"Latitude_y"]
+res.at[1139,"Longitude_y"] = res.at[294,"Longitude_y"]
 #%%
 res['distance'] = res.apply(calc_distance, axis=1)
-
+res['avg_crime_n'] = res['avg_crime_n'].fillna(0)
 #%%
 res.to_excel("final.xlsx")
