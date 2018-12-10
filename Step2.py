@@ -4,7 +4,7 @@ import openpyxl
 
 # Read the data
 DataPath = './Hotel_reviews_NLP/Tripadvisor Review Part3.xlsx'
-Locations = pd.read_excel(DataPath, Headname=None, usecols=[2,3])
+Locations = pd.read_excel(DataPath, Headname=None, usecols=[2, 3])
 Data = pd.read_excel(DataPath, Headname=None)
 LocList = []
 CityList = []
@@ -23,12 +23,12 @@ print(LocList.index(Locations.ix[10000, 0]))
 
 # Get Geocoding list
 for i in range(0, len(LocList)):
-# for i in range(0, 1):
+    # for i in range(0, 1):
     url = Geocoding + LocList[i] + ' ' + CityList[i] + Key
     data = requests.get(url).text
     print(i)
-    Latitude.append(data[data.find('<lat>')+5:data.find('</lat>')])
-    longitude.append(data[data.find('<lng>')+5:data.find('</lng>')])
+    Latitude.append(data[data.find('<lat>') + 5:data.find('</lat>')])
+    longitude.append(data[data.find('<lng>') + 5:data.find('</lng>')])
 print(Latitude, longitude)
 
 # Transform all addresses to Geocoding
