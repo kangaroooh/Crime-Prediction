@@ -4,18 +4,26 @@ import geopandas as gpd
 from sklearn import cluster
 
 # Read data
-abb_link = './data/pnegreviews.xlsx'
+abb_link = './data/NewFinal.xlsx'
 zc_link = './data/England.json'
 
 lst = pd.read_excel(abb_link)
 zc = gpd.read_file(zc_link)
 
 # Choose features
-zbd = zc.join(lst[['nb_negreview', 'nb_allreview']])
+zbd = zc.join(lst[['avg_crime_n', 'distance', 'EEF','Ratio']])
 
 # KMeans cluster
-km5 = cluster.KMeans(n_clusters=5)
-km5cls = km5.fit(zbd[['nb_negreview', 'nb_allreview']].values)
+km5 = cluster.KMeans(n_clusters=6)
+zbd.dropna(subset=['avg_crime_n', 'distance', 'EEF','Ratio'], inplace=True)
+
+# Min-Max Normalization
+zbd['avg_crime_n'] = (zbd['avg_crime_n'] - zbd['avg_crime_n'].min()) / (zbd['avg_crime_n'].max() - zbd['avg_crime_n'].min())
+zbd['distance'] = (zbd['distance'] - zbd['distance'].min()) / (zbd['distance'].max() - zbd['distance'].min())
+zbd['EEF'] = (zbd['EEF'] - zbd['EEF'].min()) / (zbd['EEF'].max() - zbd['EEF'].min())
+zbd['Ratio'] = (zbd['Ratio'] - zbd['Ratio'].min()) / (zbd['Ratio'].max() - zbd['Ratio'].min())
+
+km5cls = km5.fit(zbd[['avg_crime_n', 'distance', 'EEF','Ratio']].values)
 
 # Visualize hotels
 f, ax = plt.subplots(1, figsize=(9, 9))
