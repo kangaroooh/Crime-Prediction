@@ -1,54 +1,64 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
-from sklearn import cluster as skcluster
-#%%
-import random
-random.seed(1234)
+from sklearn import cluster
 
 # Read data
-abb_link = 'NewFinal.xlsx'
-zc_link = 'England.json'
+abb_link = './data/NewFinal.xlsx'
+zc_link = './data/London.geojson'
 
 lst = pd.read_excel(abb_link)
 zc = gpd.read_file(zc_link)
 
+
 # Choose features
-zbd = zc.join(lst[['avg_crime_n', 'distance', 'EEF','Ratio']])
-#%%
-# Replace Nan by mean
-zbd['avg_crime_n'] = zbd['avg_crime_n'].fillna(zbd['avg_crime_n'].mean())
-zbd['distance'] = zbd['distance'].fillna(zbd['distance'].mean())
-zbd['EEF'] = zbd['EEF'].fillna(zbd['EEF'].mean())
-zbd['Ratio'] = zbd['Ratio'].fillna(zbd['Ratio'].mean())
-# Min-Max Normalization
-zbd['avg_crime_n_norm'] = (zbd['avg_crime_n'] - zbd['avg_crime_n'].min()) / (zbd['avg_crime_n'].max() - zbd['avg_crime_n'].min())
-zbd['distance_norm'] = (zbd['distance'] - zbd['distance'].min()) / (zbd['distance'].max() - zbd['distance'].min())
-zbd['EEF_norm'] = (zbd['EEF'] - zbd['EEF'].min()) / (zbd['EEF'].max() - zbd['EEF'].min())
-zbd['Ratio_norm'] = (zbd['Ratio'] - zbd['Ratio'].min()) / (zbd['Ratio'].max() - zbd['Ratio'].min())
-#%%
-#elbow plot to select a suitable number of cluster
-import numpy as np
-from scipy import cluster
+# zbd = zc.join(lst[['avg_crime_n', 'distance', 'EEF','Ratio']])
 
-X =  [zbd['avg_crime_n_norm'],zbd['distance_norm'],zbd['EEF_norm'], zbd['Ratio_norm']]
 
-X1 = np.array(X)
-initial = [cluster.vq.kmeans(X1,i) for i in range(1,4)]
-plt.xlabel('decreasing time (s)')
-plt.plot([var for (cent,var) in initial])
-#%%
 # KMeans cluster
-km5 = skcluster.KMeans(n_clusters=4)
-km5cls = km5.fit(zbd[['avg_crime_n_norm', 'distance_norm', 'EEF_norm','Ratio_norm']].values)
-#%%
-# Visualize hotels
-f, ax = plt.subplots(1, figsize=(15, 15))
+km5 = cluster.KMeans(n_clusters=5)
+lst.dropna(subset=['avg_crime_n', 'distance', 'EEF','Ratio'], inplace=True)
+df = lst.reset_index(drop=True) # reset index
 
-zbd.assign(cl=km5cls.labels_)\
-   .plot(column='cl', categorical=True, legend=True, \
-         linewidth=0.1, edgecolor='white', ax=ax, cmap='tab20')
+# Min-Max Normalization
+lst['avg_crime_n'] = (lst['avg_crime_n'] - lst['avg_crime_n'].min()) / (lst['avg_crime_n'].max() - lst['avg_crime_n'].min())
+lst['distance'] = (lst['distance'] - lst['distance'].min()) / (lst['distance'].max() - lst['distance'].min())
+lst['EEF'] = (lst['EEF'] - lst['EEF'].min()) / (lst['EEF'].max() - lst['EEF'].min())
+lst['Ratio'] = (lst['Ratio'] - lst['Ratio'].min()) / (lst['Ratio'].max() - lst['Ratio'].min())
+
+km5cls = km5.fit(lst[['avg_crime_n', 'distance', 'EEF','Ratio']].values)
+
+label = km5cls.labels_
+# print(label)
+# Visualize hotels
+f, ax = plt.subplots(1, figsize=(12, 9))
+
+zc.plot(ax=ax)
+for i in range(0,df.shape[0]):
+    if label[i] == 0:
+        x = float(df.ix[i,5])
+        y = float(df.ix[i,4])
+        if x > -0.6 and y > 50:
+            plt.plot(float(x), float(y), 'r.')
+    if label[i] == 1:
+        x = float(df.ix[i, 5])
+        y = float(df.ix[i, 4])
+        if x > -0.6 and y > 50:
+            plt.plot(float(x), float(y), 'y.')
+    if label[i] == 2:
+        x = float(df.ix[i, 5])
+        y = float(df.ix[i, 4])
+        if x > -0.6 and y > 50:
+            plt.plot(float(x), float(y), 'w.')
+    if label[i] == 3:
+        x = float(df.ix[i, 5])
+        y = float(df.ix[i, 4])
+        if x > -0.6 and y > 50:
+            plt.plot(float(x), float(y), 'k.')
+    if label[i] == 4:
+        x = float(df.ix[i, 5])
+        y = float(df.ix[i, 4])
+        if x > -0.6 and y > 50:
+            plt.plot(float(x), float(y), 'c.')
 ax.set_axis_off()
 plt.show()
-#%%
-zbd.to_csv("featuresmap.csv")
