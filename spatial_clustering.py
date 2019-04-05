@@ -13,7 +13,7 @@ from shapely.geometry import Point
 import numpy as np
 from sklearn import cluster as skcluster
 import random
-random.seed(1234)
+random.seed(6728)
 #%%
 fp = "/home/r/Downloads/statistical-gis-boundaries-london/ESRI/London_Borough_Excluding_MHW.shp"
 
@@ -78,4 +78,5 @@ hotel_agg_poly.assign(cl=km5cls.labels_)\
 ax.set_axis_off()
 plt.show()
 #%%
+hotel_agg_poly['cluster'] = km5cls.labels_
 hotel_agg_poly.to_csv("hotel_cluster.csv", index=False)
