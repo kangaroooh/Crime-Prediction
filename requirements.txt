@@ -1,5 +1,5 @@
 gensim==3.4.0
 numpy==1.15
-nltk==3.3
+nltk==3.4.5
 matplotlib~=3.0.0
 smart_open==1.7
